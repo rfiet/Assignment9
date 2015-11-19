@@ -4,39 +4,112 @@
 	<meta charset="utf-8">
 	<title>Welcome to Vecta Corp.</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<link rel="stylesheet" href="css/base.css">
+	
+    <link rel="stylesheet" href="css/base.css">
+	
 	<link rel="stylesheet" href="css/skeleton.css">
+	
 	<link rel="stylesheet" href="css/layout.css">
-	<link href="jquery-ui.css" rel="stylesheet">
+	
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	
 
 	<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
 
-	<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 	<script src="jquery-ui.js"></script>
 	<script src="js/jquery.mobilemenu.js"></script>
 	<script>
+          function patternChecks(nameVal,thisPattern,thisLength,minLength) {
+
+              // if minLength == 0 it means this is an optional arg with no value
+              // so return true
+              if(minLength > 0){
+                  
+                    if(nameVal == null || nameVal == "") {  return false; }
+
+                    if(nameVal.length < 0 || nameVal.length > thisLength) { return false; }
+                    if(arguments.length > 3){ 
+
+                        if(nameVal.length < minLength) { return false; }
+                    }
+                    var matchA = nameVal.match(thisPattern);
+
+                    if(matchA == null){ return false; }
+              }
+              return true;
+          } 
 		$(document).ready(function(){
+            
+        var alphaPat  = /^[a-zA-Z]+$/;
+        var emailRegEx = /^([A-Za-z0-9_\-\.#~\$=;%\*,\!\+:&()])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,6})$/;
+        var namePat  = /^[a-zA-Z\s.,'\-]+$/;
+        var phonePat = /^[.\-0-9()]+$/;
+            
 			$('#responsive-menu').mobileMenu();
             $( "#responsive-menu .topMenu" ).tooltip();
             
             $( "#radio" ).buttonset();
             $( "#products" ).buttonset();
             $( "#companysize" ).selectmenu();
+            $( "#dialog" ).css("display","none");
+            $( "#errorMsg" ).css("display","none");
             
-        //    $( "#submitContact" ).button();
-            
-          $( "input[type=submit]" ).button().click(function( event ) {
-             event.preventDefault();
+            $( "input[type=submit]" ).button().click(function( event ) {
+             //  console.log("type=submit = " + event.target.id);
+                
+               $( "#dialog" ).dialog({
+                   
+                    autoOpen: true,
+                    buttons: {
+                      "OK": function () {
+                        $(this).dialog("close");
+                        if(patternChecks($('[name=name]').val(),namePat,30, 3) &&
+                           patternChecks($('[name=companyname]').val(),namePat,30, 3) &&
+                           patternChecks($('[name=phonenumber]').val(),phonePat,20, 3) &&
+                           patternChecks($('[name=email]').val(),emailRegEx,30, 3)){
+                           $( "#errorMsg" ).css("display","none");
+                           $("form").submit(); 
+                        }
+                        else{
+                            $( "#errorMsg" ).css("display","inline").css("color","red");
+                        }
+                        
+                      },
+                      "Cancel": function () {
+                        $(this).dialog("close");
+                        return false;
+                      },
+                      show: {
+                        effect: "explode",
+                        duration: 1000
+                      },
+                      hide: {
+                        effect: "explode",
+                        duration: 1000
+                      }
+                }
+              });
+
             });
-            
-       //     $( "#submitContact" ).button().click(function( event ) {
-       //         event.preventDefault();
-       //       });
-            
-        //     $( "#submitContact" ).button();
-		});
+ 
+});
+     /*  
+           $( "#dialog" ).dialog({
+              autoOpen: false,
+              show: {
+                effect: "explode",
+                duration: 1000
+              },
+              hide: {
+                effect: "explode",
+                duration: 1000
+              }
+           });
+    */
+
 	</script>
 </head>
 <body>
@@ -110,8 +183,11 @@
 			    <textarea name="questions" size="30" rows="5"></textarea>
 			   
 			    <input type="submit" id="submitContact" name="submitContact"  value="Submit Now">
+			    <div id="errorMsg">Please complete the form</div>
 			    <br>
-			    
+                <div id="dialog" title="Thank you">
+                  <p>Thank you for your inquiry</p>
+                </div>			    
 		    	</fieldset>
 			</form>
 	    </section>
